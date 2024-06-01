@@ -179,7 +179,7 @@
         var formData = new FormData(this);
         
         // Make AJAX request to add_book view
-        fetch('{% url 'add_book' %}', {
+        fetch("{% url 'add_book' %}", {
             method: 'POST',
             body: formData
         })
@@ -270,7 +270,7 @@
 <script>
     // Function to fetch users and populate the table
     function fetchUsers() {
-        fetch('{% url 'get_users' %}')
+        fetch("{% url 'get_users' %}")
         .then(response => response.json())
         .then(data => {
             const usersTableBody = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
@@ -296,6 +296,7 @@
         fetchUsers();
     });
 </script>
+
 
 
 
@@ -381,7 +382,7 @@
     </div>
      <footer class="footer mt-20 py-3 bg-light">
         <div class="text-center">
-            <span class="text-muted">Project done by Githmin Nelaka Saparamadu, Student ID S1033617</span>
+            <span class="text-muted">Project done by Navaneeth, Student ID AM.SC.P2ARI23008</span>
         </div>
     </footer>
     <!-- Bootstrap JS (optional) -->
