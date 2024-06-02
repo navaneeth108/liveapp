@@ -56,7 +56,6 @@
             padding: 8px 15px;
             border-radius: 5px;
             font-size: 8px;
-
             color: #000000;
             border: none;
             cursor: pointer;
@@ -66,21 +65,35 @@
         .back-btn:hover {
             background-color: #d9dde3;
         }
+        .notification {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #d9534f;
+            border-radius: 5px;
+            background-color: #f2dede;
+            color: #a94442;
+            text-align: center;
+        }
     </style>
-
 
     <div class="container">
         <button class="back-btn" onclick="window.history.back()">
             &larr; Back to Dashboard
         </button>
         <h2>My Borrowed Books</h2>
+        {% if message %}
+        <div class="notification">
+            {{ message }}
+        </div>
+        {% endif %}
         <table>
             <thead>
                 <tr>
                     <th>Title</th>
                     <th>Borrow Date</th>
                     <th>Due Date</th>
-                    <th>Action</th> <!-- Add Action column for return button -->
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -93,9 +106,9 @@
                         {% if record.returned %}
                             Returned
                         {% else %}
-                            <form method="post" action="{% url 'return_book' record.id %}">
+                            <form method="post" action="{% url 'renew_book' record.id %}">
                                 {% csrf_token %}
-                                <button type="submit">Return</button>
+                                <button type="submit">Renew</button>
                             </form>
                         {% endif %}
                     </td>

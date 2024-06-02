@@ -23,5 +23,8 @@ urlpatterns = [
     path('get_users/', get_users, name='get_users'),
     path('signup/', SignUpView.as_view(), name='signup'),
     path('return_book/<int:record_id>/', return_book, name='return_book'),
+    path('renew_book/<int:record_id>/', views.renew_book, name='renew_book'),
+    path('return_book_admin/<int:record_id>/', views.return_book_admin, name='return_book_admin'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 ]
 

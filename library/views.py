@@ -24,6 +24,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from datetime import timedelta
 
 def get_users(request):
     users = list(User.objects.all().values('username', 'email'))  # Fetch username and email fields
@@ -250,3 +251,71 @@ def add_book(request):
     else:
         # Return a JSON response indicating failure
         return JsonResponse({'success': False})
+    
+
+
+
+
+@login_required
+def renew_book(request, record_id):
+    message = None
+
+    if request.method == 'POST':
+        #record_id = request.POST.get('record_id')
+        if record_id:
+            record = get_object_or_404(BorrowRecord, id=record_id)
+            if not record.returned:
+                max_renewal_period = record.borrow_date + timedelta(days=30)
+                if record.due_date + timedelta(days=7) > max_renewal_period:
+                    message = 'Cannot renew: due date exceeds 30 days from the borrow date.'
+                else:
+                    record.due_date += timedelta(days=7)
+                    record.save()
+                    message = 'Book renewed successfully!'
+            else:
+                message = 'Book has already been returned.'
+        else:
+            message = 'Invalid record ID.'
+
+    borrowed_books = BorrowRecord.objects.filter(borrower=request.user)
+    return render(request, 'my_books.html', {
+        'borrowed_books': borrowed_books,
+        'message': message
+    })
+
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponseBadRequest
+from .models import BorrowRecord, Book
+
+def return_book_admin(request, record_id):
+    if request.method == 'POST':
+        # Retrieve the borrow record by ID or return a 404 error if not found
+        borrow_record = get_object_or_404(BorrowRecord, pk=record_id)
+
+        # Check if the book has already been returned
+        if borrow_record.returned:
+            return HttpResponseBadRequest("The book has already been returned.")
+
+        # Mark the book as returned
+        borrow_record.returned = True
+        borrow_record.save()
+
+        # Set the book as available again
+        book = borrow_record.book
+        book.is_available = True
+        book.save()
+
+        # Redirect back to the borrowed books page or any other appropriate page
+        return redirect('admin_dashboard')  # Assuming 'admin_dashboard' is the URL name for the admin dashboard
+    else:
+        return HttpResponseBadRequest("Invalid request method.")
+
+
+@login_required
+def dashboard(request): 
+    return render(request, 'dashboard.html')
+
+
+
+
+

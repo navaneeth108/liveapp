@@ -1,390 +1,396 @@
-{% extends 'navbar.html' %}
+    {% extends 'navbar.html' %}
 
-{% block content %}
-    <style>
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            background-image: url('https://images.pexels.com/photos/2908984/pexels-photo-2908984.jpeg');
-            background-size: cover;
-            background-position: center;
-}
-        .container {
-            background-color: #fff; 
-            border-radius: 10px; 
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            margin-bottom: 30px;
-        }
-        .table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    .table th,
-    .table td {
-        padding: 12px;
-        text-align: center;
-    }
-
-    .table th {
-        background-color: #007bff; 
-        color: #ffffff;
-    }
-
-    .table tbody tr:nth-child(even) {
-        background-color: #f2f2f2; 
-    }
-
-    .table tbody tr:hover {
-        background-color: #cce5ff;
-    }
-
-    .table td a {
-        text-decoration: none;
-        color: #ffffff; /* White color for link text */
-    }
-
-    .table td a:hover {
-        color: #ffffff; /* White color for link text on hover */
-        text-decoration: underline;
-    }
-
-    .btn {
-        padding: 6px 12px;
-        border-radius: 5px;
-    }
-
-    .btn-primary {
-        background-color: #007bff; /* Blue background color for primary button */
-    }
-
-    .btn-danger {
-        background-color: #dc3545; /* Red background color for danger button */
-    }
-
-    .mt-5 {
-        margin-top: 20px;
-    }
-    
-        h1 {
-            color: #343a40; 
-            font-size: 2rem; 
-            margin-bottom: 20px; 
-            text-align: center;
-        }
-        .btn-primary,
-        .btn-secondary,
-        .btn-info,
-        .btn-success,
-        .btn-danger {
-            background-color: #007bff; 
-            border-color: #007bff; 
-        }
-        .btn-primary:hover,
-        .btn-secondary:hover,
-        .btn-info:hover,
-        .btn-success:hover,
-        .btn-danger:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-            border-color: #0056b3; /* Darker border color on hover */
-        }
-        .modal-header {
-            background-color: #007bff; /* Blue header background */
-            color: #fff; /* White header text color */
-        }
-        .modal-body {
-            background-color: #f8f9fa; /* Light gray body background */
-        }
-        .modal-footer {
-            background-color: #f8f9fa; /* Light gray footer background */
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #dee2e6; /* Light gray border */
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2; /* Light gray header background */
-        }
-    </style>
-    
-    <!-- Main content -->
-    <div class="container mt-3" style="align-items: center; text-align: center">
-        <h1>Welcome, admin {{ admin_user.username }}!</h1>
-        <p style="text-align: center">Email: {{ admin_user.email }}</p>
-        <!-- Add Book Modal -->
-<div class="modal fade" style="align-items: center ; text-align: center ; justify-items: center" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addBookModalLabel">Add Book</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addBookForm">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
-                    </div>
-                    <div class="mb-3">
-                        <label for="author" class="form-label">Author</label>
-                        <input type="text" class="form-control" id="author" name="author" placeholder="Enter author">
-                    </div>
-                    <div class="mb-3">
-                        <label for="isbn" class="form-label">ISBN</label>
-                        <input type="text" class="form-control" id="isbn" name="isbn" placeholder="Enter ISBN">
-                    </div>
-                    <div class="mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <input type="text" class="form-control" id="category" name="category" placeholder="Enter category">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Book</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="successModalLabel">Success</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Book added successfully!
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Function to handle form submission and AJAX request
-    document.getElementById('addBookForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
-        
-        // Create form data object
-        var formData = new FormData(this);
-        
-        // Make AJAX request to add_book view
-        fetch("{% url 'add_book' %}", {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Book added successfully, show success modal
-                var successModal = new bootstrap.Modal(document.getElementById('successModal'));
-                successModal.show();
-                
-                // Reload the dashboard page after 2 seconds
-                setTimeout(function() {
-                    location.reload();
-                }, 2000);
-            } else {
-                // Book adding failed, handle error (e.g., display error message)
+    {% block content %}
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background-image: url('https://images.pexels.com/photos/2908984/pexels-photo-2908984.jpeg');
+                background-size: cover;
+                background-position: center;
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
-</script>
 
+            .container {
+                background-color: #fff;
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                margin-bottom: 30px;
+            }
 
-<!-- View Added Books Modal -->
-<!-- View Added Books Modal -->
-<div class="modal fade" id="viewBooksModal" tabindex="-1" aria-labelledby="viewBooksModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewBooksModalLabel">View Added Books</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            .table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+
+            .table th,
+            .table td {
+                padding: 12px;
+                text-align: center;
+            }
+
+            .table th {
+                background-color: #007bff;
+                color: #ffffff;
+            }
+
+            .table tbody tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            .table tbody tr:hover {
+                background-color: #cce5ff;
+            }
+
+            .table td a {
+                text-decoration: none;
+                color: #ffffff; /* White color for link text */
+            }
+
+            .table td a:hover {
+                color: #ffffff; /* White color for link text on hover */
+                text-decoration: underline;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                border-radius: 5px;
+            }
+
+            .btn-primary {
+                background-color: #007bff; /* Blue background color for primary button */
+            }
+
+            .btn-danger {
+                background-color: #dc3545; /* Red background color for danger button */
+            }
+
+            .mt-5 {
+                margin-top: 20px;
+            }
+
+            h1 {
+                color: #343a40;
+                font-size: 2rem;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .btn-primary,
+            .btn-secondary,
+            .btn-info,
+            .btn-success,
+            .btn-danger {
+                background-color: #007bff;
+                border-color: #007bff;
+            }
+
+            .btn-primary:hover,
+            .btn-secondary:hover,
+            .btn-info:hover,
+            .btn-success:hover,
+            .btn-danger:hover {
+                background-color: #0056b3; /* Darker blue on hover */
+                border-color: #0056b3; /* Darker border color on hover */
+            }
+
+            .modal-header {
+                background-color: #007bff; /* Blue header background */
+                color: #fff; /* White header text color */
+            }
+
+            .modal-body {
+                background-color: #f8f9fa; /* Light gray body background */
+            }
+
+            .modal-footer {
+                background-color: #f8f9fa; /* Light gray footer background */
+            }
+
+            th, td {
+                border: 1px solid #dee2e6; /* Light gray border */
+                padding: 8px;
+                text-align: left;
+            }
+
+            th {
+                background-color: #f2f2f2; /* Light gray header background */
+            }
+        </style>
+
+        <!-- Main content -->
+        <div class="container mt-3" style="align-items: center; text-align: center">
+            <h1>Welcome, admin {{ admin_user.username }}!</h1>
+            <p style="text-align: center">Email: {{ admin_user.email }}</p>
+
+            <!-- Add Book Modal -->
+            <div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addBookModalLabel">Add Book</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addBookForm">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="author" class="form-label">Author</label>
+                                    <input type="text" class="form-control" id="author" name="author" placeholder="Enter author">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="isbn" class="form-label">ISBN</label>
+                                    <input type="text" class="form-control" id="isbn" name="isbn" placeholder="Enter ISBN">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">Category</label>
+                                    <input type="text" class="form-control" id="category" name="category" placeholder="Enter category">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Book</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Author</th>
-                            <th>ISBN</th>
-                            <th>Category</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for book in books %}
-                        <tr>
-                            <td>{{ book.title }}</td>
-                            <td>{{ book.author }}</td>
-                            <td>{{ book.isbn }}</td>
-                            <td>{{ book.category }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+            <!-- Success Modal -->
+            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="successModalLabel">Success</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Book added successfully!
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <script>
+                // Function to handle form submission and AJAX request
+                document.getElementById('addBookForm').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent default form submission
+
+                    // Create form data object
+                    var formData = new FormData(this);
+
+                    // Make AJAX request to add_book view
+                    fetch("{% url 'add_book' %}", {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Book added successfully, show success modal
+                            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                            successModal.show();
+
+                            // Reload the dashboard page after 2 seconds
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            // Book adding failed, handle error (e.g., display error message)
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            </script>
+
+            <!-- View Added Books Modal -->
+            <div class="modal fade" id="viewBooksModal" tabindex="-1" aria-labelledby="viewBooksModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="viewBooksModalLabel">View Added Books</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>ISBN</th>
+                                        <th>Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for book in books %}
+                                    <tr>
+                                        <td>{{ book.title }}</td>
+                                        <td>{{ book.author }}</td>
+                                        <td>{{ book.isbn }}</td>
+                                        <td>{{ book.category }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users List Modal -->
+            <div class="modal fade" id="usersListModal" tabindex="-1" aria-labelledby="usersListModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="usersListModalLabel">Users List</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <!-- Add more columns as needed -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- User details will be populated here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Function to fetch users and populate the table
+                function fetchUsers() {
+                    fetch("{% url 'get_users' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        const usersTableBody = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
+                        usersTableBody.innerHTML = ''; // Clear existing table rows
+                        data.forEach(user => {
+                            const row = document.createElement('tr');
+                            const usernameCell = document.createElement('td');
+                            const emailCell = document.createElement('td');
+                            usernameCell.textContent = user.username;
+                            emailCell.textContent = user.email;
+                            row.appendChild(usernameCell);
+                            row.appendChild(emailCell);
+                            usersTableBody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching users:', error);
+                    });
+                }
+
+                // Event listener to trigger fetchUsers function when modal is shown
+                document.getElementById('usersListModal').addEventListener('shown.bs.modal', function() {
+                    fetchUsers();
+                });
+            </script>
+
+            <!-- Borrowed Books Modal -->
+            <div class="modal fade" id="borrowedBooksModal" tabindex="-1" aria-labelledby="borrowedBooksModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="borrowedBooksModalLabel">Borrowed Books</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Book Name</th>
+                                        <th>Borrower Name</th>
+                                        <th>Borrow Date</th>
+                                        <th>Due Date</th>
+                                       <!--  <th>Returned</th> -->
+                                        <th>Action</th> <!-- Add this column for the Return button -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for borrowrecord in borrowrecords %}
+                                    <tr>
+                                        <td>{{ borrowrecord.book.title }}</td>
+                                        <td>{{ borrowrecord.borrower.username }}</td>
+                                        <td>{{ borrowrecord.borrow_date }}</td>
+                                        <td>{{ borrowrecord.due_date }}</td>
+                                        <!-- <td>{{ borrowrecord.returned }}</td> -->
+                                        <td>
+                                            {% if not borrowrecord.returned %}
+                                            <form method="post" action="{% url 'return_book_admin' borrowrecord.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-success">Return</button>
+                                            </form>
+                                            {% else %}
+                                            Returned
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons to Trigger Modals -->
+            <div class="mt-3">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book</button>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#viewBooksModal">View Added Books</button>
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#usersListModal">Users List</button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#borrowedBooksModal">Borrowed Books</button>
+            </div>
+
+            <!-- Table to Display Added Books (This can also be displayed in the modal) -->
+            <h2 class="mt-5">Books Inventory</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>ISBN</th>
+                        <th>Category</th>
+                        <th>Availability</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.isbn }}</td>
+                        <td>{{ book.category }}</td>
+                        <td>{{ book.is_available }}</td>
+                        <td>
+                            <a href="{% url 'edit_book' book.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="{% url 'remove_book' book.id %}" class="btn btn-sm btn-danger">Remove</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </div>
-</div>
 
-
-<!-- Users List Modal -->
-<div class="modal fade" id="usersListModal" tabindex="-1" aria-labelledby="usersListModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="usersListModalLabel">Users List</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <footer class="footer mt-20 py-3 bg-light">
+            <div class="text-center">
+                <span class="text-muted">Project done by Navaneeth, Student ID AM.SC.P2ARI23008</span>
             </div>
-            <div class="modal-body">
-                <table class="table" id="usersTable">
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <!-- Add more columns as needed -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- User details will be populated here dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+        </footer>
 
-<script>
-    // Function to fetch users and populate the table
-    function fetchUsers() {
-        fetch("{% url 'get_users' %}")
-        .then(response => response.json())
-        .then(data => {
-            const usersTableBody = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
-            usersTableBody.innerHTML = ''; // Clear existing table rows
-            data.forEach(user => {
-                const row = document.createElement('tr');
-                const usernameCell = document.createElement('td');
-                const emailCell = document.createElement('td');
-                usernameCell.textContent = user.username;
-                emailCell.textContent = user.email;
-                row.appendChild(usernameCell);
-                row.appendChild(emailCell);
-                usersTableBody.appendChild(row);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching users:', error);
-        });
-    }
-
-    // Event listener to trigger fetchUsers function when modal is shown
-    document.getElementById('usersListModal').addEventListener('shown.bs.modal', function() {
-        fetchUsers();
-    });
-</script>
-
-
-
-
-
-<!-- Borrowed Books Modal -->
-<!-- Borrowed Books Modal -->
-<div class="modal fade" id="borrowedBooksModal" tabindex="-1" aria-labelledby="borrowedBooksModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="borrowedBooksModalLabel">Borrowed Books</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Book Name</th>
-                            <th>Borrower Name</th>
-                            <th>Borrow Date</th>
-                            <th>Due Date</th>
-                            <th>Returned</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for borrowrecord in borrowrecords %}
-                        <tr>
-                            <td>{{ borrowrecord.book }}</td>
-                            <td>{{ borrowrecord.borrower }}</td>
-                            <td>{{ borrowrecord.borrow_date }}</td>
-                            <td>{{ borrowrecord.due_date }}</td>
-                            <td>{{ borrowrecord.returned }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-        
-        <!-- Buttons to Trigger Modals -->
-        <div class="mt-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book</button>
-<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#viewBooksModal">View Added Books</button>
-<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#usersListModal">Users List</button>
-<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#borrowedBooksModal">Borrowed Books</button>
-
-        </div>
-        
-        <!-- Table to Display Added Books (This can also be displayed in the modal) -->
-<h2 class="mt-5">Books Inventory</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>ISBN</th>
-            <th>Category</th>
-            <th>Availability</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for book in books %}
-        <tr>
-            <td>{{ book.title }}</td>
-            <td>{{ book.author }}</td>
-            <td>{{ book.isbn }}</td>
-            <td>{{ book.category }}</td>
-            <td>{{ book.is_available }}</td>
-            <td>
-                <a href="{% url 'edit_book' book.id %}" class="btn btn-sm btn-primary">Edit</a>
-                <a href="{% url 'remove_book' book.id %}" class="btn btn-sm btn-danger">Remove</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-    </div>
-     <footer class="footer mt-20 py-3 bg-light">
-        <div class="text-center">
-            <span class="text-muted">Project done by Navaneeth, Student ID AM.SC.P2ARI23008</span>
-        </div>
-    </footer>
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-{% endblock %}
+        <!-- Bootstrap JS (optional) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    {% endblock %}
